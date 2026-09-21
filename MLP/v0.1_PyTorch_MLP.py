@@ -1,4 +1,4 @@
-import torch
+import torch  # noqa: I001
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
