@@ -21,10 +21,10 @@ class Net(torch.nn.Module):
         return x
 
 
-def get_data_loader(is_train):
+def get_data_loader(is_train, batch_size):
     to_tensor = transforms.Compose([transforms.ToTensor()])
     data_set = MNIST("", is_train, transform=to_tensor, download=True)
-    return DataLoader(data_set, batch_size=15, shuffle=True)
+    return DataLoader(data_set, batch_size=batch_size, shuffle=True)
 
 
 def evaluate(test_data, net):
@@ -46,14 +46,14 @@ def evaluate(test_data, net):
 
 def main():
 
-    train_data = get_data_loader(is_train=True)
-    test_data = get_data_loader(is_train=False)
+    train_data = get_data_loader(is_train=True, batch_size=64)
+    test_data = get_data_loader(is_train=False, batch_size=1000)
     net = Net()
 
     print("initial accuracy:", evaluate(test_data, net))
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
-    epochs = 2
+    epochs = 100
     train_losses = []
     test_accuracies = []
 
@@ -89,11 +89,27 @@ def main():
             f"test accuracy: {test_accuracy:.4f}"
         )
 
+    epoch_numbers = range(1, epochs + 1)
+
+    fig, axes = plt.subplots(1, 2, num="training curves")
+
+    axes[0].plot(epoch_numbers, train_losses, marker="o")
+    axes[0].set_title("Training Loss")
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Average Loss")
+
+    axes[1].plot(epoch_numbers, test_accuracies, marker="o")
+    axes[1].set_title("Test Accuracy")
+    axes[1].set_xlabel("Epoch")
+    axes[1].set_ylabel("Accuracy")
+
+    fig.tight_layout()
+
     for n, (x, _) in enumerate(test_data):
         if n > 3:
             break
         predict = torch.argmax(net.forward(x[0].view(-1, 28 * 28)))
-        plt.figure(n)
+        plt.figure(f"sample {n}")
         plt.imshow(x[0].view(28, 28))
         plt.title("prediction: " + str(int(predict)))
     plt.show()
