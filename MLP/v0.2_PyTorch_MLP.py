@@ -1,3 +1,6 @@
+# optimize
+# draw curves
+
 import torch  # noqa: I001
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -24,7 +27,7 @@ class Net(torch.nn.Module):
 def get_data_loader(is_train, batch_size):
     to_tensor = transforms.Compose([transforms.ToTensor()])
     data_set = MNIST("", is_train, transform=to_tensor, download=True)
-    return DataLoader(data_set, batch_size=batch_size, shuffle=True)
+    return DataLoader(data_set, batch_size=batch_size, shuffle=is_train)
 
 
 def evaluate(test_data, net):
@@ -45,6 +48,8 @@ def evaluate(test_data, net):
 
 
 def main():
+
+    torch.manual_seed(42)
 
     train_data = get_data_loader(is_train=True, batch_size=64)
     test_data = get_data_loader(is_train=False, batch_size=1000)
