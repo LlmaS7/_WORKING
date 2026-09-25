@@ -4,14 +4,14 @@
 
 桌面程序同时显示 MuJoCo、RViz 和 ROS 相机画面。抓取由命令触发，成功后保持物体；复位后可以再次抓取。第一版针对桌上已知尺寸的 3 cm 方块，检测器采用 OpenCV HSV 分割。没有假设通用 YOLO 权重能够识别这些自定义色块。
 
-## 1. 复制到 Ubuntu 22.04
+## 1. 在 Ubuntu 26.04 上准备
 
-复制**包含 `README.md`、`scripts/`、`mujoco_simulations_fr3/` 和 `franka_ros2_ws/` 的项目根目录**，例如放到 `~/franka_project_ros2`。保留整个场景的 `assets/` 和 `franka_description/meshes/`。
+保留**包含 `README.md`、`scripts/`、`mujoco_simulations_fr3/` 和 `franka_ros2_ws/` 的完整项目根目录**。本机路径为 `/home/llmas/_WORKING/ros2_vision_grasp-main`；保留场景的 `assets/` 和 `franka_description/meshes/`。
 
-需要已安装 ROS2 Humble。安装脚本补装 MoveIt、图像/TF 依赖，并创建使用系统 ROS Python 包的虚拟环境，固定 MuJoCo **3.13.0**、NumPy `<2`。不要在这个环境安装另一个 pip OpenCV，它可能覆盖 ROS 使用的系统 OpenCV。
+需要已安装 ROS 2 Lyrical。安装脚本只补装缺少的 MoveIt、图像/TF 等系统依赖，并创建使用系统 ROS Python 包的虚拟环境，固定 MuJoCo **3.13.0**，沿用 Ubuntu 的 NumPy 和 OpenCV。不要在这个环境安装另一个 pip OpenCV，它可能覆盖 ROS 使用的系统 OpenCV。
 
 ```bash
-cd ~/franka_project_ros2
+cd /home/llmas/_WORKING/ros2_vision_grasp-main
 bash scripts/setup_ubuntu.sh
 ```
 
@@ -26,7 +26,7 @@ bash scripts/build.sh
 桌面终端 1：
 
 ```bash
-cd ~/franka_project_ros2
+cd /home/llmas/_WORKING/ros2_vision_grasp-main
 bash scripts/run_demo.sh
 ```
 
@@ -39,7 +39,7 @@ bash scripts/run_demo.sh
 终端 2：
 
 ```bash
-cd ~/franka_project_ros2
+cd /home/llmas/_WORKING/ros2_vision_grasp-main
 source scripts/env.sh
 ros2 service call /pick/start std_srvs/srv/Trigger '{}'
 ros2 topic echo /pick/status --qos-durability transient_local
@@ -87,6 +87,8 @@ MUJOCO_GL=egl bash scripts/run_demo.sh viewer:=false use_rviz:=false camera_view
 ```
 
 桌面运行使用默认 GLFW，不要沿用无桌面的 `MUJOCO_GL=egl`；必要时先 `unset MUJOCO_GL`。
+
+本机 Ubuntu 26.04 / Lyrical 的无桌面抓取流程已验证。当前 NVIDIA 驱动未能被 `nvidia-smi` 识别；桌面启动时 MuJoCo 报 OpenGL `0x502` 警告，因此不能据无桌面测试推断 GUI/GPU 加速正常。若只需验证算法，可先使用上面的无桌面命令；桌面显示应在显卡驱动恢复后单独检查。
 
 相机默认 640×480、目标 15 Hz。实际帧率受 OpenGL、GPU 和 CPU 影响，**15 Hz 是配置值，不是性能保证**。RGB-D 渲染在独立线程，不用等待一帧渲染完才执行轨迹。软件 OpenGL 下关闭渲染阴影和反射以降低开销，物理接触不受影响。
 

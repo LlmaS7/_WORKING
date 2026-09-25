@@ -1,6 +1,6 @@
 # FR3 Vision Grasping Simulation
 
-A Franka FR3 grasping demo based on **ROS 2 Humble + MoveIt 2 + MuJoCo**:
+A Franka FR3 grasping demo based on **ROS 2 Lyrical + MoveIt 2 + MuJoCo**:
 
 **RGB-D Camera → OpenCV Color Detection → 3D Localization → Motion Planning → Physical Contact Grasping**
 
@@ -8,7 +8,7 @@ Currently supports red, green, and blue **3 cm blocks** using a fixed overhead c
 
 ## Run
 
-**Environment:** Ubuntu 22.04 with ROS 2 Humble installed.
+**Environment:** Ubuntu 26.04 with ROS 2 Lyrical installed.
 
 Run the following commands from the project root:
 

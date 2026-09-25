@@ -38,12 +38,18 @@ def generate_launch_description():
         'kinematics_solver': 'kdl_kinematics_plugin/KDLKinematicsPlugin',
         'kinematics_solver_search_resolution': 0.005, 'kinematics_solver_timeout': 0.1}}}
     planning = {'planning_pipelines': ['ompl'], 'default_planning_pipeline': 'ompl',
-                'ompl': {'planning_plugin': 'ompl_interface/OMPLPlanner',
-                         'request_adapters': 'default_planner_request_adapters/AddTimeOptimalParameterization '
-                                             'default_planner_request_adapters/FixWorkspaceBounds '
-                                             'default_planner_request_adapters/FixStartStateBounds '
-                                             'default_planner_request_adapters/FixStartStateCollision '
-                                             'default_planner_request_adapters/FixStartStatePathConstraints',
+                'ompl': {'planning_plugins': ['ompl_interface/OMPLPlanner'],
+                         'request_adapters': [
+                             'default_planning_request_adapters/ResolveConstraintFrames',
+                             'default_planning_request_adapters/ValidateWorkspaceBounds',
+                             'default_planning_request_adapters/CheckStartStateBounds',
+                             'default_planning_request_adapters/CheckStartStateCollision',
+                         ],
+                         'response_adapters': [
+                             'default_planning_response_adapters/AddTimeOptimalParameterization',
+                             'default_planning_response_adapters/ValidateSolution',
+                             'default_planning_response_adapters/DisplayMotionPath',
+                         ],
                          'start_state_max_bounds_error': 0.05,
                          'planner_configs': {'RRTConnect': {'type': 'geometric::RRTConnect', 'range': 0.0}},
                          'fr3_arm': {'planner_configs': ['RRTConnect']}}}

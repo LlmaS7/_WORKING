@@ -4,7 +4,7 @@ if [[ ! -f "$FR3_ROOT/franka_ros2_ws/install_vision/setup.bash" ]]; then
   echo 'Run bash scripts/setup_ubuntu.sh first.' >&2
   return 1
 fi
-source /opt/ros/humble/setup.bash
+source /opt/ros/lyrical/setup.bash
 source "$FR3_ROOT/franka_ros2_ws/install_vision/setup.bash"
 source "$FR3_ROOT/.venv-fr3/bin/activate"
 # Keep this simulator separate from other robots. Override before sourcing if needed.

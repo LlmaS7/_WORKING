@@ -2,6 +2,12 @@
 build/
 install/
 log/
+franka_ros2_ws/build_vision/
+franka_ros2_ws/install_vision/
+franka_ros2_ws/log_vision/
+.venv-fr3/
+validation_results/
+MUJOCO_LOG.TXT
 
 # Python
 __pycache__/
