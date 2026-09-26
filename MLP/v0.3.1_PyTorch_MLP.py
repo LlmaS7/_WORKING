@@ -129,10 +129,10 @@ def main():
     )
     optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
-    # ---
+    # --- HERE
     epochs = 50
     use_early_stopping = False
-    # ---
+    # --- HERE
 
     early_stopping = None
     if use_early_stopping:
