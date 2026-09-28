@@ -1,3 +1,5 @@
+# best epoch: 9 | test loss: 0.0903 | test accuracy: 0.9737
+
 # early stopping encapsulated as a reusable class
 # draw train loss, validation loss, validation accuracy
 
@@ -131,7 +133,7 @@ def main():
 
     # --- HERE
     epochs = 50
-    use_early_stopping = False
+    use_early_stopping = True
     # --- HERE
 
     early_stopping = None

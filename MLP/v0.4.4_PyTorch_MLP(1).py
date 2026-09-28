@@ -1,3 +1,5 @@
+# test loss: 0.1083 | test accuracy: 0.9785
+
 # v0.4.4: + Normalize + AdamW / Weight Decay + Dropout + LR Scheduler + Label Smoothing
 # early stopping encapsulated as a reusable class
 # draw train loss, validation loss, validation accuracy
@@ -248,10 +250,7 @@ def main():
             f"test accuracy: {test_accuracy:.4f}"
         )
     else:
-        print(
-            f"test loss: {test_loss:.4f} | "
-            f"test accuracy: {test_accuracy:.4f}"
-        )
+        print(f"test loss: {test_loss:.4f} | test accuracy: {test_accuracy:.4f}")
 
     epoch_numbers = range(1, len(train_losses) + 1)
 
