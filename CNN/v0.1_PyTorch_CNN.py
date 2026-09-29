@@ -225,7 +225,7 @@ def main():
 
     # --- HERE
     epochs = 50
-    use_early_stopping = False
+    use_early_stopping = True
     # --- HERE
 
     early_stopping = None
