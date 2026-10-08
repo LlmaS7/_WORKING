@@ -2,7 +2,6 @@
 
 import matplotlib.pyplot as plt
 import torch
-
 from config import (
     EARLY_STOPPING_MIN_DELTA,
     EARLY_STOPPING_PATIENCE,

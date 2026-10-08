@@ -1,7 +1,6 @@
 """CNN model definition."""
 
 import torch
-
 from config import DROPOUT
 
 

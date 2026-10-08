@@ -2,7 +2,6 @@
 
 import matplotlib.pyplot as plt
 import torch
-
 from config import CIFAR10_MEAN, CIFAR10_STD, CLASS_NAMES
 
 

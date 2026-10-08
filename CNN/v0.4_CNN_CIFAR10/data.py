@@ -1,10 +1,6 @@
 """CIFAR-10 transforms, split, and DataLoader construction."""
 
 import torch
-from torch.utils.data import DataLoader, Subset
-from torchvision import transforms
-from torchvision.datasets import CIFAR10
-
 from config import (
     CIFAR10_MEAN,
     CIFAR10_STD,
@@ -14,6 +10,9 @@ from config import (
     TRAIN_BATCH_SIZE,
     VALIDATION_SIZE,
 )
+from torch.utils.data import DataLoader, Subset
+from torchvision import transforms
+from torchvision.datasets import CIFAR10
 
 
 def build_transforms():
