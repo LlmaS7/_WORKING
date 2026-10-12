@@ -1,3 +1,5 @@
+# best epoch: 45 | test loss: 0.2948 | test accuracy: 0.9072
+
 """Entry point for CNN v0.4 on CIFAR-10."""
 
 import matplotlib.pyplot as plt

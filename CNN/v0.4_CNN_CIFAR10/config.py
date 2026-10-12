@@ -1,7 +1,9 @@
 """Central configuration for CNN v0.4 on CIFAR-10."""
 
+from pathlib import Path
+
 SEED = 42
-DATA_ROOT = ""
+DATA_ROOT = str(Path(__file__).resolve().parent.parent)
 
 TRAIN_BATCH_SIZE = 128
 EVALUATION_BATCH_SIZE = 1000
