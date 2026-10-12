@@ -1,2 +1,21 @@
-# CIFAR-10 数据集
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 可重新下载的数据集
+MNIST/
+/CNN/cifar-10-batches-py/
 /CNN/cifar-10-python.tar.gz
+
+# 本地环境配置
+.env
+.env.*
+!.env.example
+
+# 系统临时文件
+.DS_Store
+Thumbs.db
