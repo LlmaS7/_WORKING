@@ -1,3 +1,5 @@
+# best epoch: 38 | test loss: 0.3286 | test accuracy: 0.9073 | with residual connections
+# best epoch: 43 | test loss: 0.3514 | test accuracy: 0.8996 | without residual connections
 """Entry point for the residual CNN v0.5 on CIFAR-10."""
 
 import matplotlib.pyplot as plt
@@ -30,7 +32,10 @@ def main():
     train_loader, validation_loader, test_loader = get_data_loaders()
     net = Net().to(device)
     parameter_count = sum(p.numel() for p in net.parameters() if p.requires_grad)
-    print(f"model: CIFAR residual CNN v0.5 | trainable parameters: {parameter_count:,}")
+    print(
+        f"model: CIFAR CNN v0.5 | use_residual: {net.use_residual} | "
+        f"trainable parameters: {parameter_count:,}"
+    )
 
     initial_validation_loss, initial_validation_accuracy = evaluate(
         validation_loader,

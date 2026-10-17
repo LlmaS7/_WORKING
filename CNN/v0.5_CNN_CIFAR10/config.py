@@ -13,6 +13,8 @@ VALIDATION_SIZE = 5_000
 # Three residual stages; increase depth without making every layer very wide.
 BASE_CHANNELS = 32
 BLOCKS_PER_STAGE = (3, 3, 3)
+# True: add shortcuts; False: use only each block's convolution branch.
+USE_RESIDUAL = False
 DROPOUT = 0.1
 
 LEARNING_RATE = 1e-3

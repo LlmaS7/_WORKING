@@ -3,14 +3,15 @@
 import torch
 from torch import nn
 
-from config import BASE_CHANNELS, BLOCKS_PER_STAGE, CLASS_NAMES, DROPOUT
+from config import BASE_CHANNELS, BLOCKS_PER_STAGE, CLASS_NAMES, DROPOUT, USE_RESIDUAL
 
 
 class ResidualBlock(nn.Module):
-    """Two 3x3 convolutions, followed by shortcut addition and ReLU."""
+    """Two 3x3 convolutions with optional shortcut addition before ReLU."""
 
-    def __init__(self, in_channels, out_channels, stride=1):
+    def __init__(self, in_channels, out_channels, stride=1, use_residual=USE_RESIDUAL):
         super().__init__()
+        self.use_residual = use_residual
         self.conv1 = nn.Conv2d(
             in_channels, out_channels, 3, stride=stride, padding=1, bias=False
         )
@@ -22,7 +23,7 @@ class ResidualBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_channels)
 
         # Match both channels and spatial size when entering a new stage.
-        if stride != 1 or in_channels != out_channels:
+        if use_residual and (stride != 1 or in_channels != out_channels):
             self.shortcut = nn.Sequential(
                 nn.Conv2d(
                     in_channels, out_channels, 1, stride=stride, bias=False
@@ -33,11 +34,12 @@ class ResidualBlock(nn.Module):
             self.shortcut = nn.Identity()
 
     def forward(self, x):
-        identity = self.shortcut(x)
         out = self.relu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
         # Keep the second convolution's output linear until after addition.
-        return self.relu(out + identity)
+        if self.use_residual:
+            out = out + self.shortcut(x)
+        return self.relu(out)
 
 
 class Net(nn.Module):
@@ -49,12 +51,14 @@ class Net(nn.Module):
         blocks_per_stage=BLOCKS_PER_STAGE,
         dropout=DROPOUT,
         num_classes=len(CLASS_NAMES),
+        use_residual=USE_RESIDUAL,
     ):
         super().__init__()
         if base_channels < 1:
             raise ValueError("base_channels must be positive")
         if len(blocks_per_stage) != 3 or any(n < 1 for n in blocks_per_stage):
             raise ValueError("blocks_per_stage must contain three positive counts")
+        self.use_residual = use_residual
 
         # CIFAR-10 is only 32x32: preserve resolution at the input.
         self.stem = nn.Sequential(
@@ -76,11 +80,14 @@ class Net(nn.Module):
         self.fc = nn.Linear(base_channels * 4, num_classes)
         self._initialize_weights()
 
-    @staticmethod
-    def _make_stage(in_channels, out_channels, block_count, stride):
-        blocks = [ResidualBlock(in_channels, out_channels, stride=stride)]
+    def _make_stage(self, in_channels, out_channels, block_count, stride):
+        blocks = [
+            ResidualBlock(
+                in_channels, out_channels, stride=stride, use_residual=self.use_residual
+            )
+        ]
         blocks.extend(
-            ResidualBlock(out_channels, out_channels)
+            ResidualBlock(out_channels, out_channels, use_residual=self.use_residual)
             for _ in range(block_count - 1)
         )
         return nn.Sequential(*blocks)
@@ -96,7 +103,8 @@ class Net(nn.Module):
         # Start each residual branch at zero, then learn deviations from its
         # shortcut. Projection shortcuts still handle stage transitions.
         for module in self.modules():
-            if isinstance(module, ResidualBlock):
+            # Without a shortcut, zeroing bn2 would block the signal and gradient.
+            if isinstance(module, ResidualBlock) and module.use_residual:
                 nn.init.zeros_(module.bn2.weight)
 
     def forward(self, x):

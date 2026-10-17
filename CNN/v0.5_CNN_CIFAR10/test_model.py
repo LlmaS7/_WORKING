@@ -15,7 +15,7 @@ class ResidualCNNTests(unittest.TestCase):
         torch.manual_seed(42)
 
     def test_identity_and_signed_residual_addition(self):
-        block = ResidualBlock(4, 4).eval()
+        block = ResidualBlock(4, 4, use_residual=True).eval()
         x = torch.ones(2, 4, 8, 8)
         with torch.no_grad():
             block.conv2.weight.zero_()
@@ -28,7 +28,7 @@ class ResidualCNNTests(unittest.TestCase):
     def test_projection_handles_channels_and_downsampling(self):
         for channels, stride in ((8, 1), (4, 2), (8, 2)):
             with self.subTest(channels=channels, stride=stride):
-                block = ResidualBlock(4, channels, stride=stride).eval()
+                block = ResidualBlock(4, channels, stride=stride, use_residual=True).eval()
                 x = torch.randn(2, 4, 16, 16, requires_grad=True)
                 with torch.no_grad():
                     block.conv2.weight.zero_()
@@ -43,16 +43,47 @@ class ResidualCNNTests(unittest.TestCase):
                 self.assertGreater(block.shortcut[0].weight.grad.abs().sum().item(), 0)
 
     def test_default_network_accepts_single_and_multiple_images(self):
-        net = Net().eval()
-        with torch.no_grad():
-            for batch_size in (1, 3):
-                outputs = net(torch.randn(batch_size, 3, 32, 32))
-                self.assertEqual(outputs.shape, (batch_size, 10))
-                self.assertTrue(torch.isfinite(outputs).all().item())
+        for use_residual in (True, False):
+            with self.subTest(use_residual=use_residual), torch.no_grad():
+                net = Net(use_residual=use_residual).eval()
+                for batch_size in (1, 3):
+                    outputs = net(torch.randn(batch_size, 3, 32, 32))
+                    self.assertEqual(outputs.shape, (batch_size, 10))
+                    self.assertTrue(torch.isfinite(outputs).all().item())
+
+    def test_disabled_shortcuts_do_not_pass_input_to_output(self):
+        for channels, stride in ((4, 1), (8, 1), (4, 2), (8, 2)):
+            with self.subTest(channels=channels, stride=stride):
+                block = ResidualBlock(
+                    4, channels, stride=stride, use_residual=False
+                ).eval()
+                with torch.no_grad():
+                    block.conv2.weight.zero_()
+                    x = torch.ones(2, 4, 16, 16)
+                    torch.testing.assert_close(
+                        block(x), torch.zeros(2, channels, 16 // stride, 16 // stride)
+                    )
+
+    def test_disabled_network_receives_gradients_from_the_first_step(self):
+        net = Net(
+            base_channels=8, blocks_per_stage=(1, 1, 1), use_residual=False
+        )
+        original_stem = net.stem[0].weight.detach().clone()
+        optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
+        inputs = torch.randn(4, 3, 32, 32)
+        loss = torch.nn.functional.cross_entropy(net(inputs), torch.arange(4))
+        self.assertTrue(math.isfinite(loss.item()))
+        loss.backward()
+        # Catch zero-initialized BN layers cutting off the plain network.
+        for layer in (net.stem[0], net.stage1[0].conv1, net.stage3[0].conv2):
+            self.assertTrue(torch.isfinite(layer.weight.grad).all().item())
+            self.assertGreater(layer.weight.grad.abs().sum().item(), 0)
+        optimizer.step()
+        self.assertFalse(torch.equal(net.stem[0].weight, original_stem))
 
     def test_training_evaluation_and_best_state_restoration(self):
         # A smaller configurable instance exercises the same training path.
-        net = Net(base_channels=8, blocks_per_stage=(1, 1, 1))
+        net = Net(base_channels=8, blocks_per_stage=(1, 1, 1), use_residual=True)
         loader = DataLoader(
             TensorDataset(torch.randn(6, 3, 32, 32), torch.arange(6)),
             batch_size=3,
